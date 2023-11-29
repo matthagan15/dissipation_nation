@@ -54,13 +54,13 @@ sub basis_change
         # If cur_pauli is 1 AKA X then change basis using H
         cur_pauli -1 -> cur_pauli_cond
         if cur_pauli_cond
-            h[qubit_idx]
+            h[sys_qubits.[qubit_idx]]
         end
         # If cur_pauli is 2 AKA Y then change basis using SH (eq. 255)
         cur_pauli -2 -> cur_pauli_cond
         if cur_pauli_cond
-            sd[qubit_idx]
-            h[qubit_idx]
+            sd[sys_qubits.[qubit_idx]]
+            h[sys_qubits.[qubit_idx]]
         end
         # If cur_pauli is 3 AKA Z then we do not change this qubit basis
     next
@@ -75,13 +75,13 @@ sub basis_change_inv
         # If cur_pauli is 1 AKA X then change basis using H
         cur_pauli - 1 -> cur_pauli_cond
         if cur_pauli_cond
-            h[qubit_idx]
+            h[sys_qubits.[qubit_idx]]
         end
         # If cur_pauli is 2 AKA Y then change basis using SH (eq. 255)
         cur_pauli -2 -> cur_pauli_cond
         if cur_pauli_cond
-            h[qubit_idx]
-            s[qubit_idx]
+            h[sys_qubits.[qubit_idx]]
+            s[sys_qubits.[qubit_idx]]
         end
         # If cur_pauli is 3 AKA Z then we do not change this qubit basis
     next
