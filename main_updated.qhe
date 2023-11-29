@@ -47,17 +47,17 @@ endsub
 
 sub basis_change
     increment qubit_idx to num_qubits
-        qubit_idx + num_qubits * term_idx -> total_idx
+        qubit_idx + (num_qubits * (term_idx-1)) -> total_idx
         paulis.[total_idx] -> cur_pauli
         # If cur_pauli is 0 AKA Identity then we do not change this qubit basis
         
         # If cur_pauli is 1 AKA X then change basis using H
-        cur_pauli -1 -> cur_pauli_cond
+        cur_pauli == 1 -> cur_pauli_cond
         if cur_pauli_cond
             h[sys_qubits.[qubit_idx]]
         end
         # If cur_pauli is 2 AKA Y then change basis using SH (eq. 255)
-        cur_pauli -2 -> cur_pauli_cond
+        cur_pauli == 2 -> cur_pauli_cond
         if cur_pauli_cond
             sd[sys_qubits.[qubit_idx]]
             h[sys_qubits.[qubit_idx]]
@@ -68,17 +68,17 @@ endsub
 
 sub basis_change_inv
     increment qubit_idx to num_qubits
-        qubit_idx + num_qubits * term_idx -> total_idx
+        qubit_idx + (num_qubits * (term_idx-1)) -> total_idx
         paulis.[total_idx] -> cur_pauli
         # If cur_pauli is 0 AKA Identity then we do not change this qubit basis
         
         # If cur_pauli is 1 AKA X then change basis using H
-        cur_pauli - 1 -> cur_pauli_cond
+        cur_pauli == 1 -> cur_pauli_cond
         if cur_pauli_cond
             h[sys_qubits.[qubit_idx]]
         end
         # If cur_pauli is 2 AKA Y then change basis using SH (eq. 255)
-        cur_pauli -2 -> cur_pauli_cond
+        cur_pauli == 2 -> cur_pauli_cond
         if cur_pauli_cond
             h[sys_qubits.[qubit_idx]]
             s[sys_qubits.[qubit_idx]]
