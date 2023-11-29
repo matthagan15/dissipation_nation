@@ -1,0 +1,16 @@
+include inputs.qh
+
+increment idx to N_in
+    qubit -> _input.[idx]
+next
+sub global_resample
+    # Global resampling to Hartree-Fock state of input Hamiltonian
+    # Apply an X gate to qubits with a 1 in fock_state[i]
+    increment n_i to N_in
+        apply_X -> ~fock_state.[n_i]-1
+        if apply_X
+            x[_input.[n_i]]
+        end
+    next
+endsub
+
