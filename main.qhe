@@ -1,12 +1,19 @@
-# Initialization 
+
 gosub initialization
 
 # MAIN LOOP
-# TODO: change to while loop with stopping condition && loop_cutoff check
 1 -> main_loop_cutoff
 1 -> loop_counter
+0 -> num_successful_measurements
 repeat
     gosub weak_measurement
+    gosub measurement_outcome_processing
+    if ~total_measurement_success
+        gosub recovery_operation
+    end
+    if total_measurement_success
+        num_successful_measurements + 1 -> num_successful_measurements
+    end
     main_loop_cutoff - loop_counter -> loop_invariant
 until loop_invariant
 
@@ -56,7 +63,7 @@ sub weak_measurement_term
     phi - theta / 2 -> angle_2
     theta - phi / 2 -> angle_3
     # first ancilla rotation
-    ry[ancilla, angle_1]
+    ry(angle_1)[ancilla]
     
     # change basis
     gosub basis_change
@@ -67,15 +74,16 @@ sub weak_measurement_term
     next
     
     # second rotation
-    ry[ancilla, angle_2]
+    ry(angle_2)[ancilla]
     
     # second round of cnots
     increment control_qubit to num_qubits
-        cnot[sys_qubits.[num_qubits - control_qubits + 1], ancilla]
+        num_qubits - control_qubits + 1 -> cnot_control_idx
+        cnot[sys_qubits.[cnot_control_idx], ancilla]
     next
     
     # third rotation
-    ry[ancilla, angle_3]
+    ry(angle_3)[ancilla]
     
     # change basis back
     goinv basis_change 
@@ -105,6 +113,13 @@ sub initialization
     
 endsub
 
+sub measurement_outcome_processing
+    0 -> total_measurement_success
+    increment processing_idx to 2 * num_terms
+        total_measurement_success + measurement_outcomes.[processing_idx] -> total_measurement_success
+    next
+endsub
+
 sub recovery_operation
-    # Currently do nothing
+    # do nothing rn
 endsub
