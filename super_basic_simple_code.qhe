@@ -1,0 +1,48 @@
+# This is your source file. You'll need a main.qhe file for us to compile your code. 
+2 -> num_system_qubits
+
+1 -> ground_state.[1]
+1 -> ground_state.[2]
+
+# these are functions of epsilon and the hamiltonian coefficients
+0.52359878 -> theta
+0.25 -> phi
+
+qubit -> sys_qubits.[1]
+qubit -> sys_qubits.[2]
+qubit -> ancilla
+
+# initialize state 
+h[sys_qubits.[1]]
+h[sys_qubits.[2]]
+
+# rotate system qubits into pauli basis of hamiltonian term
+# currently using identity
+
+#first rotation of ancilla
+ry(phi)[ancilla]
+
+# cnots
+cnot[sys_qubits.[1], ancilla]
+cnot[sys_qubits.[2], ancilla]
+
+(phi - theta) / 2 -> second_angle
+ry(second_angle)[ancilla]
+
+cnot[sys_qubits.[2], ancilla]
+cnot[sys_qubits.[1], ancilla]
+
+(theta - phi) / 2 -> third_angle
+
+ry(third_angle)[ancilla]
+
+# rotate the system qubits back into computational basis
+# for us currently identity 
+
+# measure ancilla
+measure[ancilla] -> readout
+readout -> output
+# measure[sys_qubits.[1]] -> readout
+# readout -> output
+# measure[sys_qubits.[2]] -> readout
+# readout -> output
