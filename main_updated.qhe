@@ -66,6 +66,27 @@ sub basis_change
     next
 endsub
 
+sub basis_change_inv
+    increment qubit_idx to num_qubits
+        qubit_idx + num_qubits * term_idx -> total_idx
+        paulis.[total_idx] -> cur_pauli
+        # If cur_pauli is 0 AKA Identity then we do not change this qubit basis
+        
+        # If cur_pauli is 1 AKA X then change basis using H
+        cur_pauli - 1 -> cur_pauli_cond
+        if cur_pauli_cond
+            h[qubit_idx]
+        end
+        # If cur_pauli is 2 AKA Y then change basis using SH (eq. 255)
+        cur_pauli -2 -> cur_pauli_cond
+        if cur_pauli_cond
+            h[qubit_idx]
+            s[qubit_idx]
+        end
+        # If cur_pauli is 3 AKA Z then we do not change this qubit basis
+    next
+endsub
+
 sub weak_measurement_term
     coeff.[term_idx] -> phi
     phi -> angle_1
@@ -95,7 +116,7 @@ sub weak_measurement_term
     ry(angle_3)[ancilla]
     
     # change basis back
-    goinv basis_change 
+    gosub basis_change_inv
     
     measure[ancilla] -> measurement_outcomes.[measurement_outcome_idx]
 endsub
