@@ -1,3 +1,5 @@
+
+# Input processing
 input -> length_of_list
 input -> num_qubits
 input -> num_terms
@@ -7,21 +9,29 @@ next
 
 0.1 -> epsilon
 
+
+# Storage for measurement outcomes
 increment idx to 2 * num_terms
     0 -> measurement_outcomes.[idx]
 next
 
+
+ # Initialization 
 qubit -> ancilla
 
 increment qubit_idx to num_qubits
     qubit -> sys_qubits.[qubit_idx]
 next
 
+# MAIN LOOP
+# TODO: change to while loop with stopping condition && loop_cutoff check
 1 -> main_loop_cutoff
 increment main_loop_counter to main_loop_cutoff
     gosub weak_measurement
 next
 
+
+# Trotter Weak Measurement
 sub weak_measurement
     increment term_idx to 2 * num_terms
         gosub weak_measurement_term
