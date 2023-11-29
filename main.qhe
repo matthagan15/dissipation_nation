@@ -1,46 +1,52 @@
-
-# Input processing
-input -> length_of_list
-input -> num_qubits
-input -> num_terms
-increment idx to length_of_list
-    input -> unparsed_hamiltonian.[idx]
-next
-
-0.1 -> epsilon
-
-
-# Storage for measurement outcomes
-increment idx to 2 * num_terms
-    0 -> measurement_outcomes.[idx]
-next
-
-
- # Initialization 
-qubit -> ancilla
-
-increment qubit_idx to num_qubits
-    qubit -> sys_qubits.[qubit_idx]
-next
+# Initialization 
+gosub initialization
 
 # MAIN LOOP
 # TODO: change to while loop with stopping condition && loop_cutoff check
 1 -> main_loop_cutoff
-increment main_loop_counter to main_loop_cutoff
+1 -> loop_counter
+repeat
     gosub weak_measurement
-next
+    main_loop_cutoff - loop_counter -> loop_invariant
+until loop_invariant
 
 
 # Trotter Weak Measurement
 sub weak_measurement
-    increment term_idx to 2 * num_terms
+    # TODO this shit wrong, term_idx should only go up to num_terms.
+    1 -> measurement_outcome_idx
+    1 -> term_idx
+    # Go up in term index for second order trotter
+    increment placeholder to num_terms
         gosub weak_measurement_term
+        term_idx + 1 -> term_idx
+        measurement_outcome_idx + 1 -> measurement_outcome_idx
+    next
+    
+    # go down in term index for second order trotter
+    increment placeholder to num_terms
+        gosub weak_measurement_term
+        term_idx - 1 -> term_idx
+        measurement_outcome_idx + 1 -> measurement_outcome_idx
     next
 endsub
 
 sub basis_change
     increment qubit_idx to num_qubits
-    
+        qubit_idx + num_qubits * term_idx -> total_idx
+        paulis.[total_idx] -> cur_pauli
+        # If cur_pauli is 0 AKA Identity then we do not change this qubit basis
+        
+        # If cur_pauli is 1 AKA X then change basis using H
+        if cur_pauli - 1
+            h[qubit_idx]
+        end
+        # If cur_pauli is 2 AKA Y then change basis using SH (eq. 255)
+        if cur_pauli - 2
+            sd[qubit_idx]
+            h[qubit_idx
+        end
+        # If cur_pauli is 3 AKA Z then we do not change this qubit basis
     next
 endsub
 
@@ -74,4 +80,31 @@ sub weak_measurement_term
     # change basis back
     goinv basis_change 
     
+    measure[ancilla] -> measurement_outcomes.[measurement_outcome_idx]
+endsub
+
+sub initialization
+    input -> length_of_list
+    input -> num_qubits
+    input -> num_terms
+    increment idx to length_of_list - 2
+        input -> paulis.[idx]
+    next
+
+    0.1 -> epsilon
+    qubit -> ancilla
+
+    increment qubit_idx to num_qubits
+        qubit -> sys_qubits.[qubit_idx]
+    next
+    
+    # Storage for measurement outcomes
+    increment idx to 2 * num_terms
+        0 -> measurement_outcomes.[idx]
+    next
+    
+endsub
+
+sub recovery_operation
+    # Currently do nothing
 endsub
