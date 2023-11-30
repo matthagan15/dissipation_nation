@@ -1,6 +1,6 @@
 # MAIN LOOP
 1 -> main_loop_cutoff
-1 -> loop_counter
+0 -> loop_counter
 0 -> num_successful_measurements
 
 # Define the input Hamiltonian 
@@ -18,21 +18,15 @@ gosub initialization
 repeat
     gosub weak_measurement
     gosub measurement_outcome_processing
-    main_loop_cutoff - loop_counter -> loop_invariant
+    if ~total_measurement_success
+        gosub recovery_operation
+    end
+    if total_measurement_success
+        num_successful_measurements + 1 -> num_successful_measurements
+    end
     loop_counter + 1 -> loop_counter
-until loop_invariant
-
-#repeat
-#    gosub weak_measurement
-#    gosub measurement_outcome_processing
-#    if ~total_measurement_success
-#        gosub recovery_operation
-#    end
-#    if total_measurement_success
-#        num_successful_measurements + 1 -> num_successful_measurements
-#    end
-#    main_loop_cutoff - loop_counter -> loop_invariant
-#until loop_invariant
+    loop_counter == main_loop_cutoff -> stop_cond
+until stop_cond
 
 # Trotter Weak Measurement
 sub weak_measurement
