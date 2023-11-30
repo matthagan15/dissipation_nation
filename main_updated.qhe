@@ -1,6 +1,3 @@
-
-gosub initialization
-
 # MAIN LOOP
 1 -> main_loop_cutoff
 1 -> loop_counter
@@ -8,22 +5,30 @@ gosub initialization
 
 2 -> num_qubits
 1 -> num_terms
-3 -> paulis.[1]
-3 -> paulis.[2]
+2 -> paulis.[1]
+2 -> paulis.[2]
+1 -> coeff.[1]
 
+0.451027 -> theta
+0 -> phi
 
-repeat
-    gosub weak_measurement
-    gosub measurement_outcome_processing
-    if ~total_measurement_success
-        gosub recovery_operation
-    end
-    if total_measurement_success
-        num_successful_measurements + 1 -> num_successful_measurements
-    end
-    main_loop_cutoff - loop_counter -> loop_invariant
-until loop_invariant
+gosub initialization
 
+1 -> term_idx
+1 -> measurement_outcome_idx
+gosub weak_measurement_term
+
+#repeat
+#    gosub weak_measurement
+#    gosub measurement_outcome_processing
+#    if ~total_measurement_success
+#        gosub recovery_operation
+#    end
+#    if total_measurement_success
+#        num_successful_measurements + 1 -> num_successful_measurements
+#    end
+#    main_loop_cutoff - loop_counter -> loop_invariant
+#until loop_invariant
 
 # Trotter Weak Measurement
 sub weak_measurement
@@ -88,10 +93,9 @@ sub basis_change_inv
 endsub
 
 sub weak_measurement_term
-    coeff.[term_idx] -> phi
     phi -> angle_1
-    phi - theta / 2 -> angle_2
-    theta - phi / 2 -> angle_3
+    (phi - theta) / 2 -> angle_2
+    (theta - phi) / 2 -> angle_3
     # first ancilla rotation
     ry(angle_1)[ancilla]
     
@@ -108,7 +112,8 @@ sub weak_measurement_term
     
     # second round of cnots
     increment control_qubit to num_qubits
-        num_qubits - control_qubits + 1 -> cnot_control_idx
+        num_qubits + 1 -> a
+        a - control_qubit -> cnot_control_idx
         cnot[sys_qubits.[cnot_control_idx], ancilla]
     next
     
@@ -118,7 +123,8 @@ sub weak_measurement_term
     # change basis back
     gosub basis_change_inv
     
-    measure[ancilla] -> measurement_outcomes.[measurement_outcome_idx]
+    measure[ancilla] -> tmp 
+    tmp -> measurement_outcomes.[measurement_outcome_idx]
 endsub
 
 sub initialization
