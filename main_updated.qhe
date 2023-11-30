@@ -10,6 +10,8 @@
 3 -> paulis.[2]
 1 -> coeff.[1]
 
+1 -> ancilla_idx
+
 # See Eq. 254 in https://arxiv.org/pdf/2303.11962.pdf
 0.451027 -> theta
 0 -> phi
@@ -93,42 +95,43 @@ endsub
 
 sub weak_measurement_term
     phi -> angle_1
-    (phi - theta) / 2 -> angle_2
-    (theta - phi) / 2 -> angle_3
+    (phi - theta) -> angle_2
+    (theta - phi) -> angle_3
     # first ancilla rotation
-    ry(angle_1)[ancilla]
+    qubit -> ancilla_qubits.[ancilla_idx]
+    ry(angle_1)[ancilla_qubits.[ancilla_idx]]
     
     # change basis
     gosub basis_change
     
     # First round of cnots
     increment control_qubit to num_qubits
-        cnot[sys_qubits.[control_qubit], ancilla]
+        cnot[sys_qubits.[control_qubit], ancilla_qubits.[ancilla_idx]]
     next
     
     # second rotation
-    ry(angle_2)[ancilla]
+    ry(angle_2)[ancilla_qubits.[ancilla_idx]]
     
     # second round of cnots
     increment control_qubit to num_qubits
         num_qubits + 1 -> a
         a - control_qubit -> cnot_control_idx
-        cnot[sys_qubits.[cnot_control_idx], ancilla]
+        cnot[sys_qubits.[cnot_control_idx], ancilla_qubits.[ancilla_idx]]
     next
     
     # third rotation
-    ry(angle_3)[ancilla]
+    ry(angle_3)[ancilla_qubits.[ancilla_idx]]
     
     # change basis back
     gosub basis_change_inv
     
-    measure[ancilla] -> tmp 
+    measure[ancilla_qubits.[ancilla_idx]] -> tmp 
     tmp -> measurement_outcomes.[measurement_outcome_idx]
+    ancilla_idx + 1 -> ancilla_idx
 endsub
 
 sub initialization
     0.1 -> epsilon
-    qubit -> ancilla
 
     increment qubit_idx to num_qubits
         qubit -> sys_qubits.[qubit_idx]
