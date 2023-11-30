@@ -3,20 +3,24 @@
 1 -> loop_counter
 0 -> num_successful_measurements
 
+# Define the input Hamiltonian 
 2 -> num_qubits
 1 -> num_terms
 2 -> paulis.[1]
 2 -> paulis.[2]
 1 -> coeff.[1]
 
+# See Eq. 254 in https://arxiv.org/pdf/2303.11962.pdf
 0.451027 -> theta
 0 -> phi
 
 gosub initialization
-
-1 -> term_idx
-1 -> measurement_outcome_idx
-gosub weak_measurement_term
+repeat
+    gosub weak_measurement
+    gosub measurement_outcome_processing
+    main_loop_cutoff - loop_counter -> loop_invariant
+    loop_counter + 1 -> loop_counter
+until loop_invariant
 
 #repeat
 #    gosub weak_measurement
@@ -147,7 +151,8 @@ sub measurement_outcome_processing
     0 -> total_measurement_success
     2 * num_terms -> num_terms_new 
     increment processing_idx to num_terms_new
-        total_measurement_success + measurement_outcomes.[processing_idx] -> total_measurement_success
+        measurement_outcomes.[processing_idx] -> tmp
+        total_measurement_success + tmp -> total_measurement_success
     next
 endsub
 
